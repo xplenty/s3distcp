@@ -107,17 +107,16 @@
 /* 109 */     this.recordIndex += 1L;
 /* 110 */     this.recordsInThisFile = Long.valueOf(this.recordsInThisFile.longValue() + 1L);
 /* 111 */     String outputFilePath = getOutputFilePath(filePath, srcDir);
-/* 112 */     String basePath = getBaseName(filePath, srcDir);
 /* 113 */     String manifestSrcDir = this.outputDir.toString();
 /*     */     try {
 /* 115 */       FileInfo fileInfo = new FileInfo(Long.valueOf(this.recordIndex), filePathString, outputFilePath, fileSize);
 /*     */ 
 if (LOG.isDebugEnabled())
 /* 117 */       LOG.debug(new StringBuilder().append("Adding ").append(fileInfo).toString());
-/* 118 */       if ((this.previousManifest != null) && (this.previousManifest.getManifest(filePath.toString(), basePath, getFileName(filePath), fileSize) != null))
+/* 118 */       if ((this.previousManifest != null) && (this.previousManifest.getManifest(filePath.toString(), fileSize) != null))
 /*     */       {
 	LOG.debug("Found file in previous manifest: " + filePath.toString());
-			ManifestEntry entry = this.previousManifest.getManifest(filePath.toString(), basePath, getFileName(filePath), fileSize);
+			ManifestEntry entry = this.previousManifest.getManifest(filePath.toString(), fileSize);
 /* 121 */         outputFilePath = entry.path;
 /* 122 */         manifestSrcDir = entry.srcDir;
 /*     */       } else {
@@ -125,7 +124,7 @@ if (LOG.isDebugEnabled())
 /* 124 */         this.writer.append(new LongWritable(this.recordIndex), fileInfo);
 /*     */       }
 /* 126 */       if (this.manifestStream != null) {
-/* 127 */         ManifestEntry entry = new ManifestEntry(Utils.escapePath(URLDecoder.decode(outputFilePath, "UTF-8")), Utils.escapePath(URLDecoder.decode(basePath, "UTF-8")), manifestSrcDir, filePath.toString(), fileSize);
+/* 127 */         ManifestEntry entry = new ManifestEntry(Utils.escapePath(URLDecoder.decode(outputFilePath, "UTF-8")), manifestSrcDir, filePath.toString(), fileSize);
 /*     */ 
 /* 129 */         String outLine = new StringBuilder().append(this.gson.toJson(entry)).append("\n").toString();
 /* 130 */         this.manifestStream.write(outLine.getBytes("utf-8"));
