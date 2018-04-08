@@ -64,7 +64,7 @@
 /*     */   public void createInputFileList(Configuration conf, Path srcPath, FileInfoListing fileInfoListing)
 /*     */   {
 /* 378 */     URI srcUri = srcPath.toUri();
-/* 379 */     if ((srcUri.getScheme().equals("s3")) || (srcUri.getScheme().equals("s3n")))
+/* 379 */     if ((srcUri.getScheme().equals("s3")) || (srcUri.getScheme().equals("s3n")) || (srcUri.getScheme().equals("s3a")))
 /* 380 */       createInputFileListS3(conf, srcUri, fileInfoListing);
 /*     */     else
 /*     */       try {
@@ -90,7 +90,7 @@
 /*     */ 
 /*     */   public void createInputFileListS3(Configuration conf, URI srcUri, FileInfoListing fileInfoListing)
 /*     */   {
-/* 405 */     AmazonS3Client s3Client = createAmazonS3Client(conf);
+/* 405 */     AmazonS3Client s3Client = createAmazonS3Client(conf, srcUri.getHost());
 /* 406 */     ObjectListing objects = null;
 /* 407 */     boolean finished = false;
 /* 408 */     int retryCount = 0;
@@ -136,10 +136,18 @@ LOG.info("added " + objects.getObjectSummaries().size() +" files from list from 
 /*     */     }
 /*     */   }
 /*     */ 
-/*     */   public static AmazonS3Client createAmazonS3Client(Configuration conf)
-/*     */   {
+/*     */   public static AmazonS3Client createAmazonS3Client(Configuration conf, String bucketName)
+/*     */   {	
 /* 452 */     String accessKeyId = conf.get("fs.s3n.awsAccessKeyId");
 /* 453 */     String SecretAccessKey = conf.get("fs.s3n.awsSecretAccessKey");
+if (accessKeyId == null || SecretAccessKey == null) {
+	accessKeyId = conf.get("fs.s3a.bucket." + bucketName + ".access.key");
+	SecretAccessKey = conf.get("fs.s3a.bucket." + bucketName + ".secret.key");
+}
+if (accessKeyId == null || SecretAccessKey == null) {
+	accessKeyId = conf.get("fs.s3a.access.key");
+	SecretAccessKey = conf.get("fs.s3a.secret.key");
+}
 /*     */     AmazonS3Client s3Client;
 /* 455 */     if ((accessKeyId != null) && (SecretAccessKey != null)) {
 /* 456 */       s3Client = new AmazonS3Client(new BasicAWSCredentials(accessKeyId, SecretAccessKey));
