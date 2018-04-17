@@ -210,7 +210,7 @@ import java.net.URLDecoder;
 /* 229 */       String bucket = outUri.getHost();
 /*     */ 
 /* 231 */       String key = outUri.getPath().substring(1);
-/* 232 */       AmazonS3Client s3 = S3DistCp.createAmazonS3Client(this.reducer.getConf());
+/* 232 */       AmazonS3Client s3 = S3DistCp.createAmazonS3Client(this.reducer.getConf(), bucket);
 /* 233 */       s3.setEndpoint(this.reducer.getConf().get("fs.s3n.endpoint", "s3.amazonaws.com"));
 /* 234 */       ObjectMetadata meta = new ObjectMetadata();
 /* 235 */       meta.setContentLength(status.getLen());

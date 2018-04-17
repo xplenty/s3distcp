@@ -63,7 +63,7 @@ import com.google.common.collect.ImmutableMap;
 /*    */ 
 /*    */   public static boolean isS3Scheme(String scheme)
 /*    */   {
-/* 58 */     return (scheme.equals("s3")) || (scheme.equals("s3n"));
+/* 58 */     return (scheme.equals("s3")) || (scheme.equals("s3n")) || (scheme.equals("s3a"));
 /*    */   }
 /*    */ 
 /*    */   public static ThreadPoolExecutor createDefaultExecutorService() {
@@ -83,7 +83,7 @@ import com.google.common.collect.ImmutableMap;
         if (path == null) {
             return null;
         }
-        if (path.startsWith("s3://") || path.startsWith("s3n://")) {
+        if (path.startsWith("s3://") || path.startsWith("s3n://") || path.startsWith("s3a://") ) {
             return path;
         }
         StringBuilder result = new StringBuilder();
@@ -120,7 +120,7 @@ import com.google.common.collect.ImmutableMap;
         if (path == null) {
             return null;
         }
-        if (!path.startsWith("s3://") && !path.startsWith("s3n://")) {
+        if (!path.startsWith("s3://") && !path.startsWith("s3n://") && !path.startsWith("s3a://")) {
             return path;
         }
         StringBuilder result = new StringBuilder();
