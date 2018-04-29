@@ -158,12 +158,9 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /* 461 */       LOG.info("Created AmazonS3Client with role keyId " + provider.getCredentials().getAWSAccessKeyId());
 /*     */     }
 /* 463 */     String endpoint = conf.get("fs.s3n.endpoint");
-/* 464 */     if ((endpoint == null) && (isGovCloud())) {
-/* 465 */       endpoint = "s3-us-gov-west-1.amazonaws.com";
-/*     */     }
 /* 467 */     if (endpoint != null) {
-/* 468 */       LOG.info("AmazonS3Client setEndpoint s3-us-gov-west-1.amazonaws.com");
-/* 469 */       s3Client.setEndpoint("s3-us-gov-west-1.amazonaws.com");
+/* 468 */       LOG.info("AmazonS3Client setEndpoint:" + endpoint);
+/* 469 */       s3Client.setEndpoint(endpoint);
 /*     */     }
 /* 471 */     return s3Client;
 /*     */   }
@@ -176,38 +173,6 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /* 479 */     return "unknown";
 /*     */   }
 /*     */ 
-/*     */   private static boolean isGovCloud()
-/*     */   {
-/* 486 */     if (ec2MetaDataAz != null) {
-/* 487 */       return ec2MetaDataAz.startsWith("us-gov-west-1");
-/*     */     }
-/*     */ 
-/* 492 */     String hostname = getHostName();
-/* 493 */     int timeout = hostname.startsWith("ip-") ? 30000 : 5000;
-/* 494 */     GetMethod getMethod = new GetMethod("http://169.254.169.254/latest/meta-data/placement/availability-zone");
-/*     */     try {
-/* 496 */       HttpConnectionManager manager = new SimpleHttpConnectionManager();
-/* 497 */       HttpConnectionManagerParams params = manager.getParams();
-/*     */ 
-/* 499 */       params.setConnectionTimeout(timeout);
-/*     */ 
-/* 501 */       params.setSoTimeout(timeout);
-/* 502 */       HttpClient httpClient = new HttpClient(manager);
-/* 503 */       int status = httpClient.executeMethod(getMethod);
-/* 504 */       if ((status < 200) || (status > 299)) {
-/* 505 */         LOG.info("error status code" + status + " GET " + "http://169.254.169.254/latest/meta-data/placement/availability-zone");
-/*     */       } else {
-/* 507 */         ec2MetaDataAz = getMethod.getResponseBodyAsString().trim();
-/* 508 */         LOG.info("GET http://169.254.169.254/latest/meta-data/placement/availability-zone result: " + ec2MetaDataAz);
-/* 509 */         return ec2MetaDataAz.startsWith("us-gov-west-1");
-/*     */       }
-/*     */     } catch (Exception e) {
-/* 512 */       LOG.info("GET http://169.254.169.254/latest/meta-data/placement/availability-zone exception ", e);
-/*     */     } finally {
-/* 514 */       getMethod.releaseConnection();
-/*     */     }
-/* 516 */     return false;
-/*     */   }
 /*     */ 
 /*     */   public int run(String[] args)
 /*     */   {
@@ -304,9 +269,6 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /*     */ 
 /* 622 */     if (options.getS3Endpoint() != null)
 /* 623 */       job.set("fs.s3n.endpoint", options.getS3Endpoint());
-/* 624 */     else if (isGovCloud()) {
-/* 625 */       job.set("fs.s3n.endpoint", "s3-us-gov-west-1.amazonaws.com");
-/*     */     }
 /*     */ 
 /* 628 */     job.setBoolean("s3DistCp.copyFiles.useMultipartUploads", !options.getDisableMultipartUpload().booleanValue());
 /* 629 */     if (options.getMultipartUploadPartSize() != null) {
