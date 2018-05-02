@@ -46,11 +46,13 @@ String inputFileName = fileInfo.inputFileName.toString();//.replace("[", "%5B").
 /*    */     try
 /*    */     {				
 /* 46 */       String path = new URI(inputFileName).getPath();
-
-if (log.isDebugEnabled()) {
+/* 46 */       String srcDir = new URI(fileInfo.srcDir.toString()).getPath();
+/* 47 */       if (path.startsWith(srcDir)) {
+/* 48 */         path = path.substring(srcDir.length());
+/*    */       }	
 				log.debug("filename = " + inputFileName);
+				log.debug("srcDir = " + fileInfo.srcDir);
 				log.debug("path = " + path);
-}
 /* 47 */       if (path.startsWith(this.destDir)) {
 /* 48 */         path = path.substring(this.destDir.length());
 /*    */       }			   

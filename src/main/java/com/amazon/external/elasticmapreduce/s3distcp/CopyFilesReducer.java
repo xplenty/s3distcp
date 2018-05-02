@@ -56,7 +56,7 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 /*  58 */       LOG.warn("CopyFilesReducer uncommitted file " + this.uncommitedFiles.size());
 /*  59 */       for (FileInfo fileInfo : this.uncommitedFiles) {
 /*  60 */         LOG.warn("failed to upload " + fileInfo.inputFileName);
-/*  61 */         this.collector.collect(fileInfo.outputFileName, fileInfo.inputFileName);
+/*  61 */         this.collector.collect(fileInfo.outputDir, fileInfo.inputFileName);
 /*     */       }
 /*     */ 
 /*  65 */       if (this.uncommitedFiles.size() > 0) {
@@ -117,6 +117,12 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 /*     */ 
 /*     */   private String makeFinalPath(long fileUid, String finalDir, String groupId, String groupIndex) {
 /*     */ 
+		if (groupId== null || groupId.isEmpty()) {
+			groupId = finalDir;
+			finalDir = "";
+			if (groupId.startsWith("/"))
+				groupId = groupId.substring(1);
+		}
 /* 127 */     if (this.numberFiles) {
 	/* 124 */     String[] groupIds = groupId.split("/");
 	/* 125 */     groupId = fileUid + groupIds[(groupIds.length - 1)];
@@ -168,7 +174,7 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 /* 168 */       if (curSize >= this.targetSize) {
 /* 169 */         String groupId = groupKey.toString();
 /* 170 */         Path tempPath = new Path(this.tempDir + "/" + groupId);
-/* 171 */         Path finalPath = new Path(fileInfo.outputFileName.toString()).getParent();
+/* 171 */         Path finalPath = new Path(fileInfo.outputDir.toString());
 /* 172 */         String groupIndex = Integer.toString(groupNum);
 /* 173 */         if ((numFiles == 1) && 
 /* 174 */           (!fileInfos.hasNext())) {
@@ -186,7 +192,7 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 /* 186 */     if (!curFiles.isEmpty()) {
 /* 187 */       String groupId = groupKey.toString();
 /* 188 */       Path tempPath = new Path(this.tempDir + "/" + UUID.randomUUID());
-/* 189 */       Path intermediateFinal = new Path(((FileInfo)curFiles.get(0)).outputFileName.toString()).getParent();
+/* 189 */       Path intermediateFinal = new Path(((FileInfo)curFiles.get(0)).outputDir.toString());
 /* 190 */       LOG.warn("tempPath:" + tempPath + " interPath:" + intermediateFinal);
 /* 191 */       String groupIndex = Integer.toString(groupNum);
 /* 192 */       if (numFiles == 1) {

@@ -106,10 +106,10 @@
 /*     */     }
 /* 109 */     this.recordIndex += 1L;
 /* 110 */     this.recordsInThisFile = Long.valueOf(this.recordsInThisFile.longValue() + 1L);
-/* 111 */     String outputFilePath = getOutputFilePath(filePath, srcDir);
+/* 111 */     String outputDir = getOutputDir(filePath, srcDir);
 /* 113 */     String manifestSrcDir = this.outputDir.toString();
 /*     */     try {
-/* 115 */       FileInfo fileInfo = new FileInfo(Long.valueOf(this.recordIndex), filePathString, outputFilePath, fileSize);
+/* 115 */       FileInfo fileInfo = new FileInfo(Long.valueOf(this.recordIndex), filePathString, outputDir, srcDir.toString(), fileSize);
 /*     */ 
 if (LOG.isDebugEnabled())
 /* 117 */       LOG.debug(new StringBuilder().append("Adding ").append(fileInfo).toString());
@@ -117,14 +117,14 @@ if (LOG.isDebugEnabled())
 /*     */       {
 	LOG.debug("Found file in previous manifest: " + filePath.toString());
 			ManifestEntry entry = this.previousManifest.getManifest(filePath.toString(), fileSize);
-/* 121 */         outputFilePath = entry.path;
+/* 121 */         outputDir = entry.path;
 /* 122 */         manifestSrcDir = entry.srcDir;
 /*     */       } else {
 	LOG.debug("file added to filelist: " + filePath.toString());
 /* 124 */         this.writer.append(new LongWritable(this.recordIndex), fileInfo);
 /*     */       }
 /* 126 */       if (this.manifestStream != null) {
-/* 127 */         ManifestEntry entry = new ManifestEntry(Utils.escapePath(URLDecoder.decode(outputFilePath, "UTF-8")), manifestSrcDir, filePath.toString(), fileSize);
+/* 127 */         ManifestEntry entry = new ManifestEntry(Utils.escapePath(URLDecoder.decode(outputDir, "UTF-8")), manifestSrcDir, filePath.toString(), fileSize);
 /*     */ 
 /* 129 */         String outLine = new StringBuilder().append(this.gson.toJson(entry)).append("\n").toString();
 /* 130 */         this.manifestStream.write(outLine.getBytes("utf-8"));
@@ -137,32 +137,21 @@ if (LOG.isDebugEnabled())
 /*     */   private String getBaseName(Path filePath, Path srcDir)
 /*     */   {
 /* 139 */     String filePathString = filePath.toString();
-/* 140 */     String suffix = filePathString;
-/* 141 */     String srcDirString = srcDir.toString();
-/* 142 */     if (filePathString.startsWith(srcDirString)) {
-/* 143 */       suffix = filePathString.substring(srcDirString.length());
-/* 144 */       if (suffix.startsWith("/")) {
-/* 145 */         suffix = suffix.substring(1);
-/*     */       }
-/*     */     }
-/* 148 */     return suffix;
-/*     */   }
-/*     */ 
-/*     */   private String getFileName(Path filePath)
-/*     */   {
-/* 139 */     String filePathString = filePath.toString();
-/* 140 */     String suffix = filePathString;
-suffix = suffix.substring(suffix.lastIndexOf("/"));
+/* 140 */     String suffix =  filePath.toUri().getPath();
+/* 141 */     String srcDirString = srcDir.toString();/* 142 */     
 /* 144 */       if (suffix.startsWith("/")) {
 /* 145 */         suffix = suffix.substring(1);
 /*     */       }
 /* 148 */     return suffix;
 /*     */   }
 /*     */ 
-/*     */   private String getOutputFilePath(Path filePath, Path srcDir) {
-/* 152 */     String suffix = getBaseName(filePath, srcDir);
-if (suffix.isEmpty())
-	suffix = getFileName(filePath);
+/*     */   private String getOutputDir(Path filePath, Path srcDir) {
+	String suffix = srcDir.toUri().getPath();
+/* 144 */       if (suffix.startsWith("/")) {
+/* 145 */         suffix = suffix.substring(1);
+/*     */       }
+/* 153 */     LOG.debug(new StringBuilder().append("filePath: '").append(filePath).append("'").toString());
+/* 153 */     LOG.debug(new StringBuilder().append("srcDir: '").append(srcDir).append("'").toString());
 /* 153 */     LOG.debug(new StringBuilder().append("outputDir: '").append(this.outputDir).append("'").toString());
 /* 154 */     LOG.debug(new StringBuilder().append("suffix: '").append(suffix).append("'").toString());
 /* 155 */     LOG.debug(new StringBuilder().append("Output path: '").append(new Path(this.outputDir, suffix).toString()).toString());
