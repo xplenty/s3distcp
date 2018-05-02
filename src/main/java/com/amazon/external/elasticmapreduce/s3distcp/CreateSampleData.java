@@ -59,7 +59,7 @@
 /*  56 */       for (FileStatus child : contents) {
 /*  57 */         String inputFilePath = child.getPath().toString();
 /*  58 */         String outputFilePath = join(outputUri.toString(), child.getPath().getName());
-/*  59 */         FileInfo info = new FileInfo(Long.valueOf(uid.get()), inputFilePath, outputFilePath, child.getLen());
+/*  59 */         FileInfo info = new FileInfo(Long.valueOf(uid.get()), inputFilePath, outputFilePath, inputLocation, child.getLen());
 /*  60 */         fileInfoWriter.append(uid, info);
 /*  61 */         uid.set(uid.get() + 1L);
 /*     */       }
