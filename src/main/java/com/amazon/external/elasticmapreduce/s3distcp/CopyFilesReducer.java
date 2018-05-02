@@ -117,6 +117,12 @@ import org.apache.hadoop.io.compress.BZip2Codec;
 /*     */ 
 /*     */   private String makeFinalPath(long fileUid, String finalDir, String groupId, String groupIndex) {
 /*     */ 
+		if (groupId== null || groupId.isEmpty()) {
+			groupId = finalDir;
+			finalDir = "";
+			if (groupId.startsWith("/"))
+				groupId = groupId.substring(1);
+		}
 /* 127 */     if (this.numberFiles) {
 	/* 124 */     String[] groupIds = groupId.split("/");
 	/* 125 */     groupId = fileUid + groupIds[(groupIds.length - 1)];
