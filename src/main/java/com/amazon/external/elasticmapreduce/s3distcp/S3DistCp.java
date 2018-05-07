@@ -13,6 +13,7 @@
 /*     */ import emr.hbase.options.Options;
 /*     */ import emr.hbase.options.SimpleOption;
 /*     */ import java.io.File;
+import java.io.FileNotFoundException;
 /*     */ import java.io.IOException;
 /*     */ import java.io.PrintStream;
 /*     */ import java.net.InetAddress;
@@ -186,13 +187,16 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /* 528 */     Path srcPath = new Path(options.getSrcPath());
 /* 529 */     if (!srcPath.isAbsolute()) {
 /* 530 */       LOG.fatal("Source path must be absolute");
-/* 531 */       System.exit(5);
+/* 531 */       return 5;
 /*     */     }
 /*     */ 
 /*     */     try
 /*     */     {
 /* 537 */       FileSystem fs = FileSystem.get(srcPath.toUri(), job);
 /* 538 */       srcPath = fs.getFileStatus(srcPath).getPath();
+} catch (FileNotFoundException e) {
+/* 540 */       LOG.info("Source path '" + srcPath + "' not found so not executing s3distcp.");
+return 0;
 /*     */     } catch (Exception e) {
 /* 540 */       LOG.fatal("Failed to get source file system", e);
 /* 541 */       throw new RuntimeException("Failed to get source file system", e);
@@ -213,7 +217,7 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /*     */ 
 /* 558 */     if (!destPath.isAbsolute()) {
 /* 559 */       LOG.fatal("Destination path must be absolute");
-/* 560 */       System.exit(4);
+/* 560 */       return 4;
 /*     */     }
 /*     */ 
 /* 563 */     job.set("s3DistCp.copyfiles.reducer.tempDir", tempDirRoot);
@@ -241,7 +245,7 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /*     */     }
 /*     */     catch (IOException e1) {
 /* 589 */       LOG.fatal("Error initializing manifest file", e1);
-/* 590 */       System.exit(5);
+/* 590 */       return 5;
 /*     */     }
 /*     */ 
 /* 593 */     if (options.getSrcPattern() != null) {
@@ -252,14 +256,14 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /* 601 */       String groupByPattern = options.getGroupByPattern();
 /* 602 */       if ((!groupByPattern.contains("(")) || (!groupByPattern.contains(")"))) {
 /* 603 */         LOG.fatal("Group by pattern must contain at least one group.  Use () to enclose a group");
-/* 604 */         System.exit(1);
+/* 604 */         return 1;
 /*     */       }
 /*     */       try {
 /* 607 */         fileInfoListing.setGroupBy(Pattern.compile(groupByPattern));
 /* 608 */         job.set("s3DistCp.listfiles.gropubypattern", groupByPattern);
 /*     */       } catch (Exception e) {
 /* 610 */         System.err.println("Invalid group by pattern");
-/* 611 */         System.exit(1);
+/* 611 */         return 1;
 /*     */       }
 /*     */     }
 /*     */ 
@@ -300,7 +304,7 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /* 656 */         job.setLong("s3DistCp.copyfiles.reducer.targetSize", targetSize * 1024L * 1024L);
 /*     */       } catch (Exception e) {
 /* 658 */         System.err.println("Error parsing target file size");
-/* 659 */         System.exit(2);
+/* 659 */         return 2;
 /*     */       }
 /*     */     }
 /*     */ 
@@ -310,7 +314,7 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /* 656 */         job.setLong("s3DistCp.copyfiles.mapper.fileBuckets", fileBuckets);
 /*     */       } catch (Exception e) {
 /* 658 */         System.err.println("Error parsing file buckets");
-/* 659 */         System.exit(2);
+/* 659 */         return 2;
 /*     */       }
 /*     */     }
 /*     */ 
