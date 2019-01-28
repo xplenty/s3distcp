@@ -45,12 +45,12 @@ import org.apache.hadoop.fs.Path;
 /*    */     Text key;
 String inputFileName = new Path(fileInfo.inputFileName.toString()).toUri().toString();//.replace("[", "%5B").replace("]", "%5D").replace(":", "%3A").replace(" ", "%20");
 /*    */     try
-/*    */     {				
+/*    */     {
 /* 46 */       String path = new URI(inputFileName).getPath();
-/* 46 */       String srcDir = new URI(fileInfo.srcDir.toString()).getPath();
+/* 46 */       String srcDir = new URI(new Path(fileInfo.srcDir.toString()).toUri().toString()).getPath();
 /* 47 */       if (path.startsWith(srcDir)) {
 /* 48 */         path = path.substring(srcDir.length());
-/*    */       }	
+/*    */       }
 				log.debug("filename = " + inputFileName);
 				log.debug("srcDir = " + fileInfo.srcDir);
 				log.debug("path = " + path);
