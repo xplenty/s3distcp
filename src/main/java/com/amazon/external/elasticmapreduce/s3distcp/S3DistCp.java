@@ -18,6 +18,7 @@ import java.io.FileNotFoundException;
 /*     */ import java.io.PrintStream;
 /*     */ import java.net.InetAddress;
 /*     */ import java.net.URI;
+/*     */ import java.net.URLDecoder;
 /*     */ import java.net.UnknownHostException;
 /*     */ import java.util.ArrayDeque;
 /*     */ import java.util.Map;
@@ -192,8 +193,8 @@ if (accessKeyId == null || SecretAccessKey == null) {
 /*     */ 
 /*     */     try
 /*     */     {
-/* 537 */       FileSystem fs = FileSystem.get(srcPath.toUri(), job);
-/* 538 */       srcPath = fs.getFileStatus(srcPath).getPath();
+/* 537 */       FileSystem fs = FileSystem.get(new URI(srcPath.toString()), job);
+/* 538 */       srcPath = fs.getFileStatus(new Path(URLDecoder.decode(srcPath.toString()))).getPath();
 } catch (FileNotFoundException e) {
 /* 540 */       LOG.info("Source path '" + srcPath + "' not found so not executing s3distcp.");
 return 0;
