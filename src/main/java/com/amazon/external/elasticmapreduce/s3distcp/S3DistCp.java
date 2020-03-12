@@ -522,12 +522,12 @@ destFs.mkdirs(destPath);
 /* 193 */           ManifestEntry entry = (ManifestEntry)gson.fromJson(line, ManifestEntry.class);
 /* 194 */           manifest.addManifest(entry);
 /*     */         }
-				  scanner.close();
-				} catch (FileNotFoundException e) {
-				  LOG.warn("Manifest file '" + manifestPath + "' not found.");
+                  scanner.close();
+                } catch (FileNotFoundException e) {
+                  LOG.warn("Manifest file '" + manifestPath + "' not found.");
 /*     */       } catch (Exception e) {
-/* 197 */         LOG.error("Failed to load manifest '" + manifestPath + "'", e);				  
-				  System.exit(1);
+/* 197 */         LOG.error("Failed to load manifest '" + manifestPath + "'", e);
+				          System.exit(1);
 /*     */       } finally {
 /* 199 */         if (inStream != null) {
 /*     */           try {
