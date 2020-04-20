@@ -523,14 +523,17 @@ destFs.mkdirs(destPath);
 /* 194 */           manifest.addManifest(entry);
 /*     */         }
                   scanner.close();
+                } catch (FileNotFoundException e) {
+                  LOG.warn("Manifest file '" + manifestPath + "' not found.");
 /*     */       } catch (Exception e) {
-/* 197 */         LOG.error("Failed to load manifest '" + manifestPath + "'");
+/* 197 */         LOG.error("Failed to load manifest '" + manifestPath + "'", e);
+				          System.exit(1);
 /*     */       } finally {
 /* 199 */         if (inStream != null) {
 /*     */           try {
 /* 201 */             inStream.close();
 /*     */           } catch (IOException e) {
-/* 203 */             LOG.warn("Failed to clsoe stream for manifest file " + manifestPath, e);
+/* 203 */             LOG.warn("Failed to close stream for manifest file " + manifestPath, e);
 /*     */           }
 /*     */         }
 /*     */       }
