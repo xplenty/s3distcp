@@ -46,6 +46,7 @@ import java.io.FileNotFoundException;
 /*     */ import org.apache.hadoop.mapred.Counters.Group;
 /*     */ import org.apache.hadoop.mapred.FileInputFormat;
 /*     */ import org.apache.hadoop.mapred.FileOutputFormat;
+/*     */ import org.apache.hadoop.mapred.InvalidInputException;
 /*     */ import org.apache.hadoop.mapred.JobClient;
 /*     */ import org.apache.hadoop.mapred.JobConf;
 /*     */ import org.apache.hadoop.mapred.RunningJob;
@@ -353,6 +354,13 @@ destFs.mkdirs(destPath);
 /* 692 */         destFs.copyFromLocalFile(new Path(manifestFile.getAbsolutePath()), destPath);
 /* 693 */         manifestFile.delete();
 /*     */       }
+              } catch (InvalidInputException iie) {
+                if (options.isignoreMissingInputException()) {
+                    return 0;
+                } else {
+                    deleteRecursiveNoThrow(job, tempPath);
+                    throw new RuntimeException("Error running job", iie);
+                }
 /*     */     } catch (IOException e) {
 /* 696 */       deleteRecursiveNoThrow(job, tempPath);
 /* 697 */       throw new RuntimeException("Error running job", e);
@@ -411,6 +419,7 @@ destFs.mkdirs(destPath);
 /*  87 */     Boolean copyFromManifest = Boolean.valueOf(false);
 /*     */     Integer fileBuckets;
 /*  88 */     boolean helpDefined = false;
+              boolean ignoreMissingInputException = false;
 /*     */ 
 /*     */     public S3DistCpOptions()
 /*     */     {
@@ -437,6 +446,8 @@ destFs.mkdirs(destPath);
 /* 112 */       OptionWithArg previousManifest = options.withArg("--previousManifest", "The path to an existing manifest file");
 /* 113 */       SimpleOption copyFromManifest = options.noArg("--copyFromManifest", "Copy from a manifest instead of listing a directory");
 /* 103 */       OptionWithArg fileBucketsOption = options.withArg("--fileBuckets", "Number of buckets for output files (overrides '--groupBy' option)");
+/* 103 */       OptionWithArg ignoreMissingInputExceptionOption = options.withArg("--ignoreMissingInputException", "Ignore missing input exception");
+
 /* 114 */       options.parseArguments(args, true);
 /* 115 */       if (helpOption.defined()) {
 /* 116 */         LOG.info(options.helpText());
@@ -502,6 +513,9 @@ destFs.mkdirs(destPath);
 /* 144 */       if (fileBucketsOption.defined()) {
 /* 145 */         setFileBuckets(fileBucketsOption.value);
 /*     */       }
+                if (ignoreMissingInputExceptionOption.defined()) {
+                    setignoreMissingInputException(Boolean.valueOf(ignoreMissingInputExceptionOption.value));
+                }
 
 /*     */     }
 /*     */ 
@@ -710,6 +724,14 @@ destFs.mkdirs(destPath);
 /*     */     public boolean isHelpDefined() {
 /* 370 */       return this.helpDefined;
 /*     */     }
+
+              public void setignoreMissingInputException(boolean ignoreMissingInputException) {
+                this.ignoreMissingInputException = ignoreMissingInputException;
+              }
+              
+              public boolean isignoreMissingInputException() {
+                return this.ignoreMissingInputException;
+              }
 /*     */   }
 /*     */ }
 
